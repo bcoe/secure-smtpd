@@ -48,8 +48,8 @@ class SMTPChannel(smtpd.SMTPChannel):
                 self.push('334 ' + base64.b64encode('Username'))
                 
         elif not self.username:
-                self.username = base64.b64decode( arg )
-                self.push('334 ' + base64.b64encode('Password'))
+            self.username = base64.b64decode( arg )
+            self.push('334 ' + base64.b64encode('Password'))
         else:
             self.authenticating = False
             self.password = base64.b64decode(arg)
@@ -59,7 +59,9 @@ class SMTPChannel(smtpd.SMTPChannel):
             else:
                 self.push('454 Temporary authentication failure.')
                 raise ExitNow()
-            
+    
+    # This code is taken directly from the underlying smtpd.SMTPChannel
+    # support for AUTH is added.
     def found_terminator(self):
         line = EMPTYSTRING.join(self.__line)
         
