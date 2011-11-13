@@ -9,6 +9,6 @@ class FakeCredentialValidator(object):
         
         secure_smtpd.logger.warn('FakeCredentialValidator: you should replace this with an actual implementation of a credential validator.')
         
-        if username == 'foo' and password == 'bar':
+        if username == 'bcoe' and password == 'foobar':
             return True
         return False

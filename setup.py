@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="secure_smtpd",
+    name="secure-smtpd",
     version="0.0.1",
     description="Extension to Pythons standard SMTP server. Adding support for various extensions to the protocol..",
     author="Benjamin Coe",
