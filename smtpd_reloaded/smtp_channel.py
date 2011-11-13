@@ -8,7 +8,6 @@ class SMTPChannel(smtpd.SMTPChannel):
     EXTENSIONS = [
         'AUTH LOGIN'
     ]
-    CHALLENGE = 'challenge string'
     
     def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False):
         smtpd.SMTPChannel.__init__(self, smtp_server, newsocket, fromaddr)
