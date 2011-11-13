@@ -4,7 +4,7 @@ from smtp_server import SMTPServer
 from fake_credential_validator import FakeCredentialValidator
 
 def _create_logger():
-    log_name = '/var/log/smtpd_reloaded.log'
+    log_name = '/var/log/secure_smtpd.log'
     logger = logging.getLogger( log_name )
     logger.setLevel(logging.DEBUG)
     handler = RotatingFileHandler(

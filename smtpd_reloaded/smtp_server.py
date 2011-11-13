@@ -1,4 +1,4 @@
-import smtpd_reloaded
+import secure_smtpd
 import ssl, smtpd, time, asyncore
 from smtp_channel import SMTPChannel
 from multiprocessing import Process
@@ -25,7 +25,7 @@ class SMTPServer(smtpd.SMTPServer):
         self.current_process_id += 1
         
         if self.debug:
-            smtpd_reloaded.logger.info('handle_accept(): called.')
+            secure_smtpd.logger.info('handle_accept(): called.')
         
         process = Process(target=self._accept_subprocess, args=[self.queue, self.current_process_id])
         process.start()
@@ -40,7 +40,7 @@ class SMTPServer(smtpd.SMTPServer):
                 self.process_lookup[process_id].terminate()
                 
                 if self.debug:
-                    smtpd_reloaded.logger.info('_terminate_completed_subprocesses(): subprocess %d terminated.' % process_id)
+                    secure_smtpd.logger.info('_terminate_completed_subprocesses(): subprocess %d terminated.' % process_id)
                 
         except Empty:
             pass
@@ -50,7 +50,7 @@ class SMTPServer(smtpd.SMTPServer):
             pair = self.accept()
             
             if self.debug:
-                smtpd_reloaded.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
+                secure_smtpd.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
             
             if pair is not None:
                 newsocket, fromaddr = pair
@@ -72,11 +72,11 @@ class SMTPServer(smtpd.SMTPServer):
                 )
                 
                 if self.debug:
-                    smtpd_reloaded.logger.info('_accept_subprocess(): starting asyncore within subprocess.')
+                    secure_smtpd.logger.info('_accept_subprocess(): starting asyncore within subprocess.')
                 
                 asyncore.loop()
-                smtpd_reloaded.logger.error('_accept_subprocess(): asyncore loop exited.')
+                secure_smtpd.logger.error('_accept_subprocess(): asyncore loop exited.')
         except ExitNow:
             if self.debug:
-                smtpd_reloaded.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')
+                secure_smtpd.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')
             queue.put(process_id)

@@ -1,5 +1,5 @@
 import asyncore
-from smtpd_reloaded import SMTPServer, FakeCredentialValidator
+from secure_smtpd import SMTPServer, FakeCredentialValidator
 
 class SSLSMTPServer(SMTPServer):
     

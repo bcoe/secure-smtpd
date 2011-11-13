@@ -1,4 +1,4 @@
-import smtpd, base64, smtpd_reloaded
+import smtpd, base64, secure_smtpd
 from asyncore import ExitNow
 from smtpd import NEWLINE, EMPTYSTRING
 
@@ -64,7 +64,7 @@ class SMTPChannel(smtpd.SMTPChannel):
         line = EMPTYSTRING.join(self.__line)
         
         if self.debug:
-            smtpd_reloaded.logger.info('found_terminator(): data: %s' % repr(line))
+            secure_smtpd.logger.info('found_terminator(): data: %s' % repr(line))
             
         self.__line = []
         if self.__state == self.COMMAND:
