@@ -1,5 +1,5 @@
 import asyncore
-from smtpd_reloaded import SMTPServer
+from smtpd_reloaded import SMTPServer, FakeCredentialValidator
 
 class SSLSMTPServer(SMTPServer):
     
@@ -10,7 +10,17 @@ class SSLSMTPServer(SMTPServer):
         print message_data
         
     def start(self):
-        SMTPServer.__init__(self, ('0.0.0.0', 465), None, require_authentication=True, certfile='examples/server.crt', keyfile='examples/server.key')
+        SMTPServer.__init__(
+            self,
+            ('0.0.0.0', 465),
+            None,
+            require_authentication=True,
+            ssl=True,
+            certfile='examples/server.crt',
+            keyfile='examples/server.key',
+            credential_validator=FakeCredentialValidator(),
+            debug=True
+        )
         asyncore.loop()
         
 server = SSLSMTPServer()

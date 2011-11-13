@@ -1,21 +1,18 @@
-import smtpd
-import base64
+import smtpd, base64, smtpd_reloaded
 from asyncore import ExitNow
-from smtpd import DEBUGSTREAM, NEWLINE, EMPTYSTRING, COMMASPACE
+from smtpd import NEWLINE, EMPTYSTRING
 
 class SMTPChannel(smtpd.SMTPChannel):
     
-    EXTENSIONS = [
-        'AUTH LOGIN'
-    ]
-    
-    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False):
+    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, debug=False):
         smtpd.SMTPChannel.__init__(self, smtp_server, newsocket, fromaddr)
         self.require_authentication = require_authentication
         self.authenticating = False
         self.authenticated = False
         self.username = None
         self.password = None
+        self.debug = debug
+        self.credential_validator = credential_validator
     
     def smtp_QUIT(self, arg):
         self.push('221 Bye')
@@ -33,8 +30,7 @@ class SMTPChannel(smtpd.SMTPChannel):
             self.push('503 Duplicate HELO/EHLO')
         else:
             self.push('250-%s Hello %s' %  (self.__fqdn, arg))
-            for extension in self.EXTENSIONS:
-                self.push('250-%s' % extension)
+            self.push('250-AUTH LOGIN')
             self.push('250 EHLO')
     
     def smtp_AUTH(self, arg):
@@ -42,6 +38,9 @@ class SMTPChannel(smtpd.SMTPChannel):
             self.authenticating = True
             split_args = arg.split(' ')
             
+            # Some implmentations of 'LOGIN' seem to provide the username
+            # along with the 'LOGIN' stanza, hence both situations are
+            # handled.
             if len(split_args) == 2:
                 self.username = base64.b64decode( arg.split(' ')[1] )
                 self.push('334 ' + base64.b64encode('Username'))
@@ -54,15 +53,19 @@ class SMTPChannel(smtpd.SMTPChannel):
         else:
             self.authenticating = False
             self.password = base64.b64decode(arg)
-            if self.username == 'bcoe' and self.password == 'pass':
+            if self.credential_validator and self.credential_validator.validate(self.username, self.password):
                 self.authenticated = True
                 self.push('235 Authentication successful.')
             else:
                 self.push('454 Temporary authentication failure.')
+                raise ExitNow()
             
     def found_terminator(self):
         line = EMPTYSTRING.join(self.__line)
-        #print >> DEBUGSTREAM, 'Data:', repr(line)
+        
+        if self.debug:
+            smtpd_reloaded.logger.info('found_terminator(): data: %s' % repr(line))
+            
         self.__line = []
         if self.__state == self.COMMAND:
             if not line:
@@ -72,6 +75,8 @@ class SMTPChannel(smtpd.SMTPChannel):
             i = line.find(' ')
             
             if self.authenticating:
+                # If we are in an authenticating state, call the
+                # method smtp_AUTH.
                 arg = line.strip()
                 command = 'AUTH'
             elif i < 0:
@@ -81,6 +86,7 @@ class SMTPChannel(smtpd.SMTPChannel):
                 command = line[:i].upper()
                 arg = line[i+1:].strip()
             
+            # White list of operations that are allowed prior to AUTH.
             if not command in ['AUTH', 'EHLO', 'HELO', 'NOOP', 'RSET', 'QUIT']:
                 if self.require_authentication and not self.authenticated:
                     self.push('530 Authentication required')

@@ -1,13 +1,13 @@
 import smtplib
 
-msg = """From: foobar@vmimage
-To: ben@vmimage
+msg = """From: foo@localhost
+To: bar@localhost
 
 Here's my message!
 """
 
-server = smtplib.SMTP_SSL('vmimage', port=465)
+server = smtplib.SMTP_SSL('localhost', port=465)
 server.set_debuglevel(1)
-server.login('bcoe', 'foobar')
-server.sendmail('foobar@localhost', ['ben@vmimage'], msg)
+server.login('foo', 'bar')
+server.sendmail('foo@localhost', ['bar@localhost'], msg)
 server.quit()
