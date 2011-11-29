@@ -38,6 +38,7 @@ class SMTPServer(smtpd.SMTPServer):
         
         def alive(process_dict):
             if (current_time - process_dict['start_time']) > self.MAXIMUM_EXECUTION_TIME:
+                process_dict['process'].terminate()
                 return False
             return process_dict['process'].is_alive()
             
