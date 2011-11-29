@@ -19,11 +19,12 @@ class SMTPServer(smtpd.SMTPServer):
         self.credential_validator = credential_validator
         self.ssl = ssl
         self.maximum_execution_time = maximum_execution_time
+        self.process_count = process_count
         self.process_pool = None
         
     def handle_accept(self):
         if not self.process_pool:
-            self.process_pool = ProcessPool(self._accept_subprocess, process_count=process_count)
+            self.process_pool = ProcessPool(self._accept_subprocess, process_count=self.process_count)
         
         if self.debug:
             secure_smtpd.logger.info('handle_accept(): called.')
