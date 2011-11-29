@@ -7,7 +7,7 @@ from asyncore import ExitNow
 class SMTPServer(smtpd.SMTPServer):
     
     KILL_SIGNAL = 9
-    MAXIMUM_EXECUTION_TIME = 2
+    MAXIMUM_EXECUTION_TIME = 20
         
     def __init__(self, localaddr, remoteaddr, ssl=False, certfile=None, keyfile=None, ssl_version=ssl.PROTOCOL_SSLv23, require_authentication=False, credential_validator=None, debug=False):
         smtpd.SMTPServer.__init__(self, localaddr, remoteaddr)
