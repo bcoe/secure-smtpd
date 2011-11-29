@@ -1,6 +1,5 @@
-import smtpd, base64, secure_smtpd
+import smtpd, base64, secure_smtpd, asynchat
 from asyncore import ExitNow
-import asynchat
 from smtpd import NEWLINE, EMPTYSTRING
 
 class SMTPChannel(smtpd.SMTPChannel):

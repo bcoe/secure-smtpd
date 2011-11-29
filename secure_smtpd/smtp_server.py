@@ -1,5 +1,5 @@
 import secure_smtpd
-import ssl, smtpd, time, asyncore, os, signal
+import ssl, smtpd, time, asyncore, os
 from smtp_channel import SMTPChannel
 from multiprocessing import Process
 from asyncore import ExitNow
