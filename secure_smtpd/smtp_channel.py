@@ -1,11 +1,13 @@
 import smtpd, base64, secure_smtpd
 from asyncore import ExitNow
+import asynchat
 from smtpd import NEWLINE, EMPTYSTRING
 
 class SMTPChannel(smtpd.SMTPChannel):
     
-    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, debug=False):
+    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, debug=False, map=None):
         smtpd.SMTPChannel.__init__(self, smtp_server, newsocket, fromaddr)
+        asynchat.async_chat.__init__(self, newsocket, map=map)
         self.require_authentication = require_authentication
         self.authenticating = False
         self.authenticated = False

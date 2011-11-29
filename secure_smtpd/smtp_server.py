@@ -1,12 +1,13 @@
 import secure_smtpd
-import ssl, smtpd, time, asyncore
+import ssl, smtpd, time, asyncore, os, signal
 from smtp_channel import SMTPChannel
 from multiprocessing import Process
-from multiprocessing import Process, Queue
-from Queue import Empty
 from asyncore import ExitNow
 
 class SMTPServer(smtpd.SMTPServer):
+    
+    KILL_SIGNAL = 9
+    MAXIMUM_EXECUTION_TIME = 2
         
     def __init__(self, localaddr, remoteaddr, ssl=False, certfile=None, keyfile=None, ssl_version=ssl.PROTOCOL_SSLv23, require_authentication=False, credential_validator=None, debug=False):
         smtpd.SMTPServer.__init__(self, localaddr, remoteaddr)
@@ -14,40 +15,38 @@ class SMTPServer(smtpd.SMTPServer):
         self.certfile = certfile
         self.keyfile = keyfile
         self.ssl_version = ssl_version
-        self.process_lookup = {}
-        self.current_process_id = 0
-        self.queue = Queue()
+        self.subprocesses = []
         self.require_authentication = require_authentication
         self.credential_validator = credential_validator
         self.ssl = ssl
         
     def handle_accept(self):
-        self.current_process_id += 1
-        
         if self.debug:
             secure_smtpd.logger.info('handle_accept(): called.')
         
-        process = Process(target=self._accept_subprocess, args=[self.queue, self.current_process_id])
+        process = Process(target=self._accept_subprocess, args=[])
+        self.subprocesses.append({
+            'process': process,
+            'start_time': time.time()
+        })
         process.start()
         
-        self.process_lookup[self.current_process_id] = process
-        self._terminate_completed_subprocesses()
+        self._terminate_expired_subprocesses()
         
-    def _terminate_completed_subprocesses(self):
-        try:
-            while True:
-                process_id = self.queue.get(block=True, timeout=0.01)
-                self.process_lookup[process_id].terminate()
-                
-                if self.debug:
-                    secure_smtpd.logger.info('_terminate_completed_subprocesses(): subprocess %d terminated.' % process_id)
-                
-        except Empty:
-            pass
+    def _terminate_expired_subprocesses(self):
+        current_time = time.time()
         
-    def _accept_subprocess(self, queue, process_id):
+        def alive(process_dict):
+            if (current_time - process_dict['start_time']) > self.MAXIMUM_EXECUTION_TIME:
+                return False
+            return process_dict['process'].is_alive()
+            
+        self.subprocesses = filter(alive, self.subprocesses)
+        
+    def _accept_subprocess(self):
         try:
             pair = self.accept()
+            map = {}
             
             if self.debug:
                 secure_smtpd.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
@@ -68,15 +67,16 @@ class SMTPServer(smtpd.SMTPServer):
                     fromaddr,
                     require_authentication=self.require_authentication,
                     credential_validator=self.credential_validator,
-                    debug=self.debug
+                    debug=self.debug,
+                    map=map
                 )
                 
                 if self.debug:
                     secure_smtpd.logger.info('_accept_subprocess(): starting asyncore within subprocess.')
                 
-                asyncore.loop()
+                asyncore.loop(map=map)
                 secure_smtpd.logger.error('_accept_subprocess(): asyncore loop exited.')
         except ExitNow:
             if self.debug:
                 secure_smtpd.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')
-            queue.put(process_id)
+            os.kill( os.getpid(), self.KILL_SIGNAL )
