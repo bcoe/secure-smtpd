@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="secure-smtpd",
-    version="1.1.0",
+    version="1.1.1",
     description="Adds support for SSL, AUTH, and other goodies, to Petri Lehtinen's SMTPD library.",
     author="Benjamin Coe",
     author_email="bencoe@gmail.com",
