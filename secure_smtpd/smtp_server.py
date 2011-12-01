@@ -72,6 +72,13 @@ class SMTPServer(smtpd.SMTPServer):
                     
                     self.logger.error('_accept_subprocess(): asyncore loop exited.')
             except (ExitNow, SSLError):
-                newsocket.shutdown(socket.SHUT_RDWR)
-                newsocket.close()
-                self.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')            
+                try:
+                    newsocket.shutdown(socket.SHUT_RDWR)
+                    newsocket.close()
+                except Exception, se:
+                    self.logger.error('_accept_subprocess(): failed to cleanly shutdown socket: %s' % str(se))
+                    
+                self.logger.info('_accept_subprocess(): smtp channel terminated asyncore.') 
+            except Exception, e:
+                self.logger.error('_accept_subprocess(): uncaught exception: %s' % str(e)) 
+      
