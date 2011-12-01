@@ -83,4 +83,4 @@ class SMTPServer(smtpd.SMTPServer):
             s.shutdown(socket.SHUT_RDWR)
             s.close()
         except Exception, e:
-            self.logger.error('_shutdown_socket(): failed to cleanly shutdown socket: %s' % str(se))
+            self.logger.error('_shutdown_socket(): failed to cleanly shutdown socket: %s' % str(e))
