@@ -1,3 +1,2 @@
 import log
-
-LOG_NAME = 'secure-smtp'
+from log import LOG_NAME

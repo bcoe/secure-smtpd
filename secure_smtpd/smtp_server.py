@@ -28,8 +28,6 @@ class SMTPServer(smtpd.SMTPServer):
         if not self.process_pool:
             self.process_pool = ProcessPool(self._accept_subprocess, process_count=self.process_count)
         
-        self.logger.info('handle_accept(): called.')
-        
         self.process_pool.handle_accept()
         
     def _accept_subprocess(self, queue):
@@ -44,9 +42,9 @@ class SMTPServer(smtpd.SMTPServer):
                 pair = self.accept()
                 map = {}
                 
-                self.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
-                
                 if pair is not None:
+                    
+                    self.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
                     
                     newsocket, fromaddr = pair
                     newsocket.settimeout(self.maximum_execution_time)
