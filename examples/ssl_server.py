@@ -1,4 +1,5 @@
-import asyncore
+import secure_smtpd
+import asyncore, logging
 from secure_smtpd import SMTPServer, FakeCredentialValidator
 
 class SSLSMTPServer(SMTPServer):
@@ -18,10 +19,11 @@ class SSLSMTPServer(SMTPServer):
             ssl=True,
             certfile='examples/server.crt',
             keyfile='examples/server.key',
-            credential_validator=FakeCredentialValidator(),
-            debug=True
+            credential_validator=FakeCredentialValidator()
         )
         asyncore.loop()
-        
+
+logger = logging.getLogger( secure_smtpd.LOG_NAME )
+logger.setLevel(logging.INFO)
 server = SSLSMTPServer()
 server.start()

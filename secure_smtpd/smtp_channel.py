@@ -1,10 +1,12 @@
-import smtpd, base64, secure_smtpd, asynchat
+import secure_smtpd
+import smtpd, base64, secure_smtpd, asynchat, logging
+
 from asyncore import ExitNow
 from smtpd import NEWLINE, EMPTYSTRING
 
 class SMTPChannel(smtpd.SMTPChannel):
     
-    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, debug=False, map=None):
+    def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, map=None):
         smtpd.SMTPChannel.__init__(self, smtp_server, newsocket, fromaddr)
         asynchat.async_chat.__init__(self, newsocket, map=map)
         self.require_authentication = require_authentication
@@ -12,8 +14,8 @@ class SMTPChannel(smtpd.SMTPChannel):
         self.authenticated = False
         self.username = None
         self.password = None
-        self.debug = debug
         self.credential_validator = credential_validator
+        self.logger = logging.getLogger( secure_smtpd.LOG_NAME )
     
     def smtp_QUIT(self, arg):
         self.push('221 Bye')
@@ -67,7 +69,7 @@ class SMTPChannel(smtpd.SMTPChannel):
         line = EMPTYSTRING.join(self.__line)
         
         if self.debug:
-            secure_smtpd.logger.info('found_terminator(): data: %s' % repr(line))
+            self.logger.info('found_terminator(): data: %s' % repr(line))
             
         self.__line = []
         if self.__state == self.COMMAND:

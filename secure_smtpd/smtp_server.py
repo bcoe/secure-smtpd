@@ -1,5 +1,6 @@
 import secure_smtpd
-import ssl, smtpd, asyncore, socket
+import ssl, smtpd, asyncore, socket, logging
+
 from smtp_channel import SMTPChannel
 from asyncore import ExitNow
 from process_pool import ProcessPool
@@ -8,9 +9,9 @@ from ssl import SSLError
 
 class SMTPServer(smtpd.SMTPServer):
     
-    def __init__(self, localaddr, remoteaddr, ssl=False, certfile=None, keyfile=None, ssl_version=ssl.PROTOCOL_SSLv23, require_authentication=False, credential_validator=None, debug=False, maximum_execution_time=30, process_count=5):
+    def __init__(self, localaddr, remoteaddr, ssl=False, certfile=None, keyfile=None, ssl_version=ssl.PROTOCOL_SSLv23, require_authentication=False, credential_validator=None, maximum_execution_time=30, process_count=5):
         smtpd.SMTPServer.__init__(self, localaddr, remoteaddr)
-        self.debug = debug
+        self.logger = logging.getLogger( secure_smtpd.LOG_NAME )
         self.certfile = certfile
         self.keyfile = keyfile
         self.ssl_version = ssl_version
@@ -21,13 +22,13 @@ class SMTPServer(smtpd.SMTPServer):
         self.maximum_execution_time = maximum_execution_time
         self.process_count = process_count
         self.process_pool = None
+
         
     def handle_accept(self):
         if not self.process_pool:
             self.process_pool = ProcessPool(self._accept_subprocess, process_count=self.process_count)
         
-        if self.debug:
-            secure_smtpd.logger.info('handle_accept(): called.')
+        self.logger.info('handle_accept(): called.')
         
         self.process_pool.handle_accept()
         
@@ -43,8 +44,7 @@ class SMTPServer(smtpd.SMTPServer):
                 pair = self.accept()
                 map = {}
                 
-                if self.debug:
-                    secure_smtpd.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
+                self.logger.info('_accept_subprocess(): smtp connection accepted within subprocess.')
                 
                 if pair is not None:
                     
@@ -65,17 +65,15 @@ class SMTPServer(smtpd.SMTPServer):
                         fromaddr,
                         require_authentication=self.require_authentication,
                         credential_validator=self.credential_validator,
-                        debug=self.debug,
                         map=map
                     )
                     
-                    if self.debug:
-                        secure_smtpd.logger.info('_accept_subprocess(): starting asyncore within subprocess.')
+                    self.logger.info('_accept_subprocess(): starting asyncore within subprocess.')
                     
                     asyncore.loop(map=map)
-                    secure_smtpd.logger.error('_accept_subprocess(): asyncore loop exited.')
+                    
+                    self.logger.error('_accept_subprocess(): asyncore loop exited.')
             except (ExitNow, SSLError):
                 newsocket.shutdown(socket.SHUT_RDWR)
                 newsocket.close()
-                if self.debug:
-                    secure_smtpd.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')            
+                self.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')            
