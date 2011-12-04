@@ -13,6 +13,3 @@ class ProcessPool(object):
         for i in range(0, self.process_count):
             process = Process(target=self.func, args=[self.queue])
             process.start()
-            
-    def handle_accept(self):
-        self.queue.put(True)

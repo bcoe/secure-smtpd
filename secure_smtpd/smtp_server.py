@@ -22,22 +22,13 @@ class SMTPServer(smtpd.SMTPServer):
         self.maximum_execution_time = maximum_execution_time
         self.process_count = process_count
         self.process_pool = None
-
         
     def handle_accept(self):
-        if not self.process_pool:
-            self.process_pool = ProcessPool(self._accept_subprocess, process_count=self.process_count)
-        
-        self.process_pool.handle_accept()
-        
+        self.process_pool = ProcessPool(self._accept_subprocess, process_count=self.process_count)
+        self.close()
+    
     def _accept_subprocess(self, queue):
         while True:
-            
-            try:
-                queue.get(block=True)
-            except Empty:
-                pass
-            
             try:
                 pair = self.accept()
                 map = {}

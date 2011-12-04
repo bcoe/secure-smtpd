@@ -19,7 +19,8 @@ class SSLSMTPServer(SMTPServer):
             ssl=True,
             certfile='examples/server.crt',
             keyfile='examples/server.key',
-            credential_validator=FakeCredentialValidator()
+            credential_validator=FakeCredentialValidator(),
+            maximum_execution_time = 1.0
         )
         asyncore.loop()
 
