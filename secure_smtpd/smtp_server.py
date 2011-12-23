@@ -1,4 +1,4 @@
-import secure_smtpd
+import secure_smtpd, time
 import ssl, smtpd, asyncore, socket, logging
 
 from smtp_channel import SMTPChannel
@@ -30,6 +30,7 @@ class SMTPServer(smtpd.SMTPServer):
     def _accept_subprocess(self, queue):
         while True:
             try:
+                self.socket.setblocking(1)
                 pair = self.accept()
                 map = {}
                 
