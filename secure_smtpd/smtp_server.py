@@ -1,4 +1,4 @@
-import secure_smtpd, time
+import secure_smtpd
 import ssl, smtpd, asyncore, socket, logging
 
 from smtp_channel import SMTPChannel
