@@ -10,7 +10,9 @@ setup(
     author_email="bencoe@gmail.com",
     url="https://github.com/bcoe/secure-smtpd",
     packages = find_packages(),
-    install_requires = [],
+    install_requires = [
+        'argparse'
+    ],
     tests_require=[
         'nose'
     ]

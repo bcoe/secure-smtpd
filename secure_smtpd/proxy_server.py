@@ -1,5 +1,5 @@
+import smtplib
 import secure_smtpd
-
 from smtp_server import SMTPServer
 from store_credentials import StoreCredentials
 
@@ -9,25 +9,25 @@ class ProxyServer(SMTPServer):
 
     * if "ssl" is true accepts SSL connections inbound and connects via SSL
         outbound
-    * adds "sslOutOnly", which can be set to True when "ssl" is False so that
+    * adds "ssl_out_only", which can be set to True when "ssl" is False so that
         inbound connections are in plain text but outbound are in SSL
-    * adds "printDebug", which if True prints all inbound messages to stdout
+    * adds "debug", which if True prints all inbound messages to stdout
     * ignores any credential validators, passing any credentials upstream
     """
     def __init__(self, *args, **kwargs):
-        self.sslOutOnly = False
-        if kwargs.has_key('sslOutOnly'):
-            self.sslOutOnly = kwargs.pop('sslOutOnly')
+        self.ssl_out_only = False
+        if kwargs.has_key('ssl_out_only'):
+            self.ssl_out_only = kwargs.pop('ssl_out_only')
 
-        self.printDebug = False
-        if kwargs.has_key('printDebug'):
-            self.printDebug = kwargs.pop('printDebug')
+        self.debug = False
+        if kwargs.has_key('debug'):
+            self.debug = kwargs.pop('debug')
 
         kwargs['credential_validator'] = StoreCredentials()
         SMTPServer.__init__(self, *args, **kwargs)
 
     def process_message(self, peer, mailfrom, rcpttos, data):
-        if self.printDebug:
+        if self.debug:
             # ------------------------
             # stolen directly from stmpd.DebuggingServer
             inheaders = 1
@@ -58,11 +58,9 @@ class ProxyServer(SMTPServer):
         # ------------------------
         # following code is adapted from smtpd.PureProxy with modifications to
         # handle upstream SSL
-
-        import smtplib
         refused = {}
         try:
-            if self.ssl or self.sslOutOnly:
+            if self.ssl or self.ssl_out_only:
                 s = smtplib.SMTP_SSL()
             else:
                 s = smtplib.SMTP()
@@ -70,8 +68,10 @@ class ProxyServer(SMTPServer):
             s.connect(self._remoteaddr[0], self._remoteaddr[1])
             if self.credential_validator.stored:
                 # we had credentials passed in, use them
-                s.login(self.credential_validator.username,
-                    self.credential_validator.password)
+                s.login(
+                    self.credential_validator.username,
+                    self.credential_validator.password
+                )
             try:
                 refused = s.sendmail(mailfrom, rcpttos, data)
                 print 'refused: ', refused
