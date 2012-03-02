@@ -11,7 +11,7 @@ class ProxyServer(SMTPServer):
         outbound
     * adds "ssl_out_only", which can be set to True when "ssl" is False so that
         inbound connections are in plain text but outbound are in SSL
-    * adds "debug", which if True prints all inbound messages to stdout
+    * adds "debug", which if True copies all inbound messages to logger.info()
     * ignores any credential validators, passing any credentials upstream
     """
     def __init__(self, *args, **kwargs):
@@ -32,14 +32,14 @@ class ProxyServer(SMTPServer):
             # stolen directly from stmpd.DebuggingServer
             inheaders = 1
             lines = data.split('\n')
-            print '---------- MESSAGE FOLLOWS ----------'
+            self.logger.info('---------- MESSAGE FOLLOWS ----------')
             for line in lines:
                 # headers first
                 if inheaders and not line:
-                    print 'X-Peer:', peer[0]
+                    self.logger.info('X-Peer: %s', peer[0])
                     inheaders = 0
-                print line
-            print '------------ END MESSAGE ------------'
+                self.logger.info(line)
+            self.logger.info('------------ END MESSAGE ------------')
 
         # ------------------------
         # following code is direct from smtpd.PureProxy
@@ -74,14 +74,16 @@ class ProxyServer(SMTPServer):
                 )
             try:
                 refused = s.sendmail(mailfrom, rcpttos, data)
-                print 'refused: ', refused
+                if refused != {}:
+                    self.logger.error('some connections refused %s', refused)
             finally:
                 s.quit()
         except smtplib.SMTPRecipientsRefused, e:
-            print '********* ERROR: got SMTPRecipientsRefused'
+            self.logger.exception('')
             refused = e.recipients
         except (socket.error, smtplib.SMTPException), e:
-            print '********* ERROR: got', e.__class__
+            self.logger.exception('')
+
             # All recipients were refused.  If the exception had an associated
             # error code, use it.  Otherwise,fake it with a non-triggering
             # exception code.
