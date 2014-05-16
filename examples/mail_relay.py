@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import asyncore
+import asyncore,time
 import argparse
 from secure_smtpd import ProxyServer
 
@@ -78,3 +78,7 @@ print 'sslboth: ', args.sslboth
 print 'sslout: ', args.sslout
 print
 run(args)
+# termination of this process will kill worker children in process
+# pool so idle here...
+while 1:
+    time.sleep(1)

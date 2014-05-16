@@ -1,4 +1,4 @@
-import asyncore
+import asyncore,time
 from secure_smtpd import SMTPServer, FakeCredentialValidator
 
 class SecureSMTPServer(SMTPServer):
@@ -19,3 +19,7 @@ class SecureSMTPServer(SMTPServer):
         
 server = SecureSMTPServer()
 server.start()
+# termination of this process will kill worker children in process
+# pool, so idle here...
+while 1:
+    time.sleep(1)

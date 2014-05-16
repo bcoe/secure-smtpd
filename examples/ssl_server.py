@@ -1,5 +1,5 @@
 import secure_smtpd
-import asyncore, logging
+import asyncore, logging, time
 from secure_smtpd import SMTPServer, FakeCredentialValidator
 
 class SSLSMTPServer(SMTPServer):
@@ -28,3 +28,7 @@ logger = logging.getLogger( secure_smtpd.LOG_NAME )
 logger.setLevel(logging.INFO)
 server = SSLSMTPServer()
 server.start()
+# termination of this process will kill worker children in process
+# pool so idle here...
+while 1:
+    time.sleep(1)
