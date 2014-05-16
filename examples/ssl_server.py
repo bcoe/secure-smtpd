@@ -1,5 +1,5 @@
 import secure_smtpd
-import asyncore, logging, time
+import asyncore, logging, time, signal, sys
 from secure_smtpd import SMTPServer, FakeCredentialValidator
 
 class SSLSMTPServer(SMTPServer):
@@ -28,7 +28,19 @@ logger = logging.getLogger( secure_smtpd.LOG_NAME )
 logger.setLevel(logging.INFO)
 server = SSLSMTPServer()
 server.start()
-# termination of this process will kill worker children in process
-# pool so idle here...
+
+# normal termination of this process will kill worker children in
+# process pool so this process (the parent) needs to idle here waiting
+# for termination signal.  If you don't have a signal handler, then
+# Python multiprocess cleanup stuff doesn't happen, and children won't
+# get killed by sending SIGTERM to parent.
+
+def sig_handler(signal,frame):
+    logger.info("Got signal %s, shutting down." % signal)
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, sig_handler)
+
 while 1:
     time.sleep(1)
+
