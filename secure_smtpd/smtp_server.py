@@ -1,5 +1,5 @@
 import secure_smtpd
-import ssl, smtpd, asyncore, socket, logging
+import ssl, smtpd, asyncore, socket, logging, signal, time, sys
 
 from smtp_channel import SMTPChannel
 from asyncore import ExitNow
@@ -76,3 +76,14 @@ class SMTPServer(smtpd.SMTPServer):
             s.close()
         except Exception, e:
             self.logger.error('_shutdown_socket(): failed to cleanly shutdown socket: %s' % str(e))
+
+
+    def run(self):
+        asyncore.loop()
+        if hasattr(signal, 'SIGTERM'):
+            def sig_handler(signal,frame):
+                self.logger.info("Got signal %s, shutting down." % signal)
+                sys.exit(0)
+            signal.signal(signal.SIGTERM, sig_handler)
+        while 1:
+            time.sleep(1)
