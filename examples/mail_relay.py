@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import asyncore
 import argparse
 from secure_smtpd import ProxyServer
 
@@ -18,8 +17,8 @@ def run(cmdargs):
     if not cmdargs.quiet:
         kwargs['debug'] = True
 
-    ProxyServer(*args, **kwargs)
-    asyncore.loop()
+    server = ProxyServer(*args, **kwargs)
+    server.run()
 
 parser = argparse.ArgumentParser(description='mail relay tool')
 

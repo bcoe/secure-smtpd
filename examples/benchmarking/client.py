@@ -10,7 +10,7 @@ while True:
         current_time = time.time()
         print '%s msg-written/sec' % (messages_sent / (current_time - start_time))
     
-    server = smtplib.SMTP('localhost', port=25)
+    server = smtplib.SMTP('localhost', port=1025)
     server.sendmail('foo@localhost', ['bar@localhost'], msg)
     server.quit()
     
