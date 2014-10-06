@@ -34,7 +34,7 @@ class SMTPChannel(smtpd.SMTPChannel):
             self.push('503 Duplicate HELO/EHLO')
         else:
             self.push('250-%s Hello %s' %  (self.__fqdn, arg))
-            self.push('250-AUTH LOGIN')
+            self.push('250-AUTH LOGIN PLAIN')
             self.push('250 EHLO')
     
     def smtp_AUTH(self, arg):
@@ -44,7 +44,6 @@ class SMTPChannel(smtpd.SMTPChannel):
             authbits = base64.b64decode(split_args[1]).split("\0")
             self.username = authbits[1]
             self.password = authbits[2]
-            print("username: %s password: %s" % (self.username, self.password))
             if self.credential_validator and self.credential_validator.validate(self.username, self.password):
                 self.authenticated = True
                 self.push('235 Authentication successful.')
