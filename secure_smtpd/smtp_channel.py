@@ -38,7 +38,21 @@ class SMTPChannel(smtpd.SMTPChannel):
             self.push('250 EHLO')
     
     def smtp_AUTH(self, arg):
-        if 'LOGIN' in arg:
+        if 'PLAIN' in arg:
+            split_args = arg.split(' ')
+            # second arg is Base64-encoded string of blah\0username\0password
+            authbits = base64.b64decode(split_args[1]).split("\0")
+            self.username = authbits[1]
+            self.password = authbits[2]
+            print("username: %s password: %s" % (self.username, self.password))
+            if self.credential_validator and self.credential_validator.validate(self.username, self.password):
+                self.authenticated = True
+                self.push('235 Authentication successful.')
+            else:
+                self.push('454 Temporary authentication failure.')
+                raise ExitNow()
+ 
+        elif 'LOGIN' in arg:
             self.authenticating = True
             split_args = arg.split(' ')
             
