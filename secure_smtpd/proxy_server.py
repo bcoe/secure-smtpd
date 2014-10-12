@@ -78,10 +78,10 @@ class ProxyServer(SMTPServer):
                     self.logger.error('some connections refused %s', refused)
             finally:
                 s.quit()
-        except smtplib.SMTPRecipientsRefused, e:
+        except smtplib.SMTPRecipientsRefused as e:
             self.logger.exception('')
             refused = e.recipients
-        except (socket.error, smtplib.SMTPException), e:
+        except (socket.error, smtplib.SMTPException) as e:
             self.logger.exception('')
 
             # All recipients were refused.  If the exception had an associated

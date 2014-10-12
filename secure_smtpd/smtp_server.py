@@ -70,7 +70,7 @@ class SMTPServer(smtpd.SMTPServer):
             except (ExitNow, SSLError):
                 self._shutdown_socket(newsocket)
                 self.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')
-            except Exception, e:
+            except Exception as e:
                 self._shutdown_socket(newsocket)
                 self.logger.error('_accept_subprocess(): uncaught exception: %s' % str(e))
 
@@ -78,7 +78,7 @@ class SMTPServer(smtpd.SMTPServer):
         try:
             s.shutdown(socket.SHUT_RDWR)
             s.close()
-        except Exception, e:
+        except Exception as e:
             self.logger.error('_shutdown_socket(): failed to cleanly shutdown socket: %s' % str(e))
 
 
