@@ -20,5 +20,5 @@ while True:
         server.sendmail('foo@localhost', ['bar@localhost'], msg)
         server.quit()
     except Exception as e:
-        print e
+        print(e)
     time.sleep(0.05)
