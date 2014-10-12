@@ -4,8 +4,12 @@ import ssl, smtpd, asyncore, socket, logging, signal, time, sys
 from smtp_channel import SMTPChannel
 from asyncore import ExitNow
 from process_pool import ProcessPool
-from Queue import Empty
 from ssl import SSLError
+try:
+    from Queue import Empty
+except ImportError:
+    # We're on python3
+    from queue import Empty
 
 class SMTPServer(smtpd.SMTPServer):
 
