@@ -2,11 +2,14 @@
 #from distutils.core import setup
 from setuptools import setup, find_packages
 
+with open('README.markdown') as f:
+    long_description = f.read()
+
 setup(
     name="secure-smtpd",
     version="2.1.1",
     description="Adds support for SSL, AUTH, and other goodies, to Petri Lehtinen's SMTPD library.",
-    long_description=open('README.markdown').read(),
+    long_description=long_description,
     author="Benjamin Coe",
     author_email="bencoe@gmail.com",
     url="https://github.com/bcoe/secure-smtpd",
