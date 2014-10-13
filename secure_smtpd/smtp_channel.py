@@ -24,7 +24,10 @@ class SMTPChannel(smtpd.SMTPChannel):
         raise ExitNow()
         
     def collect_incoming_data(self, data):
-        self.__line.append(data.decode('utf-8'))
+        if not isinstance(data, str):
+            # We're on python3, so we have to decode the bytestring
+            data = data.decode('utf-8')
+        self.__line.append(data)
     
     def smtp_EHLO(self, arg):
         if not arg:
