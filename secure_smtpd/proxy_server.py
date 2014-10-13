@@ -16,11 +16,11 @@ class ProxyServer(SMTPServer):
     """
     def __init__(self, *args, **kwargs):
         self.ssl_out_only = False
-        if kwargs.has_key('ssl_out_only'):
+        if 'ssl_out_only' in kwargs:
             self.ssl_out_only = kwargs.pop('ssl_out_only')
 
         self.debug = False
-        if kwargs.has_key('debug'):
+        if 'debug' in kwargs:
             self.debug = kwargs.pop('debug')
 
         kwargs['credential_validator'] = StoreCredentials()
