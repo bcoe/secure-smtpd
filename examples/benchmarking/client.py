@@ -2,7 +2,7 @@ import smtplib, time
 
 messages_sent = 0.0
 start_time = time.time()
-msg = file('examples/benchmarking/benchmark.eml').read()
+msg = open('examples/benchmarking/benchmark.eml').read()
 
 while True:
     
