@@ -7,7 +7,7 @@ with open('README.markdown') as f:
 
 setup(
     name="secure-smtpd",
-    version="2.1.1",
+    version="2.1.2",
     description="Adds support for SSL, AUTH, and other goodies, to Petri Lehtinen's SMTPD library.",
     long_description=long_description,
     author="Benjamin Coe",
