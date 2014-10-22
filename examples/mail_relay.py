@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import sys
 from secure_smtpd import ProxyServer
 
 def run(cmdargs):
@@ -11,6 +12,11 @@ def run(cmdargs):
 
     if cmdargs.sslboth:
         kwargs['ssl'] = True
+        if not cmdargs.certfile or not cmdargs.keyfile:
+            print ('You need to specify a valid certificate file and a key file!')
+            sys.exit(1)
+        kwargs['certfile'] = cmdargs.certfile
+        kwargs['keyfile'] = cmdargs.keyfile
     elif cmdargs.sslout:
         kwargs['ssl_out_only'] = True
 
@@ -66,6 +72,16 @@ group.add_argument(
     '--sslout',
     action='store_true', 
     help='Use this parameter if inbound connection is plain but the outbound connection uses SSL'
+)
+
+parser.add_argument(
+    '--certfile',
+    help='Certificate file to use for inbound SSL connections'
+)
+
+parser.add_argument(
+    '--keyfile',
+    help='Key file to use for inbound SSL connections'
 )
 
 args = parser.parse_args()
