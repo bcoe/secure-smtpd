@@ -1,2 +1,2 @@
-import log
-from log import LOG_NAME
+from . import log
+from .log import LOG_NAME

@@ -86,10 +86,10 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-print 'Starting ProxyServer'
-print 'local: %s:%s' % (args.localhost, args.localport)
-print 'remote: %s:%s' % (args.remotehost, args.remoteport)
-print 'sslboth: ', args.sslboth
-print 'sslout: ', args.sslout
+print('Starting ProxyServer')
+print('local: %s:%s' % (args.localhost, args.localport))
+print('remote: %s:%s' % (args.remotehost, args.remoteport))
+print('sslboth: ', args.sslboth)
+print('sslout: ', args.sslout)
 print
 run(args)

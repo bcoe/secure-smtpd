@@ -4,6 +4,18 @@ import smtpd, base64, secure_smtpd, asynchat, logging
 from asyncore import ExitNow
 from smtpd import NEWLINE, EMPTYSTRING
 
+def decode_b64(data):
+    '''Wrapper for b64decode, without having to struggle with bytestrings.'''
+    byte_string = data.encode('utf-8')
+    decoded = base64.b64decode(byte_string)
+    return decoded.decode('utf-8')
+
+def encode_b64(data):
+    '''Wrapper for b64encode, without having to struggle with bytestrings.'''
+    byte_string = data.encode('utf-8')
+    encoded = base64.b64encode(byte_string)
+    return encoded.decode('utf-8')
+
 class SMTPChannel(smtpd.SMTPChannel):
     
     def __init__(self, smtp_server, newsocket, fromaddr, require_authentication=False, credential_validator=None, map=None):
@@ -24,6 +36,9 @@ class SMTPChannel(smtpd.SMTPChannel):
         raise ExitNow()
         
     def collect_incoming_data(self, data):
+        if not isinstance(data, str):
+            # We're on python3, so we have to decode the bytestring
+            data = data.decode('utf-8')
         self.__line.append(data)
     
     def smtp_EHLO(self, arg):
@@ -41,7 +56,7 @@ class SMTPChannel(smtpd.SMTPChannel):
         if 'PLAIN' in arg:
             split_args = arg.split(' ')
             # second arg is Base64-encoded string of blah\0username\0password
-            authbits = base64.b64decode(split_args[1]).split("\0")
+            authbits = decode_b64(split_args[1]).split('\0')
             self.username = authbits[1]
             self.password = authbits[2]
             if self.credential_validator and self.credential_validator.validate(self.username, self.password):
@@ -59,17 +74,17 @@ class SMTPChannel(smtpd.SMTPChannel):
             # along with the 'LOGIN' stanza, hence both situations are
             # handled.
             if len(split_args) == 2:
-                self.username = base64.b64decode( arg.split(' ')[1] )
-                self.push('334 ' + base64.b64encode('Username'))
+                self.username = decode_b64(arg.split(' ')[1])
+                self.push('334 ' + encode_b64('Username'))
             else:
-                self.push('334 ' + base64.b64encode('Username'))
+                self.push('334 ' + encode_b64('Username'))
                 
         elif not self.username:
-            self.username = base64.b64decode( arg )
-            self.push('334 ' + base64.b64encode('Password'))
+            self.username = decode_b64(arg)
+            self.push('334 ' + encode_b64('Password'))
         else:
             self.authenticating = False
-            self.password = base64.b64decode(arg)
+            self.password = decode_b64(arg)
             if self.credential_validator and self.credential_validator.validate(self.username, self.password):
                 self.authenticated = True
                 self.push('235 Authentication successful.')
@@ -104,7 +119,7 @@ class SMTPChannel(smtpd.SMTPChannel):
             else:
                 command = line[:i].upper()
                 arg = line[i+1:].strip()
-            
+
             # White list of operations that are allowed prior to AUTH.
             if not command in ['AUTH', 'EHLO', 'HELO', 'NOOP', 'RSET', 'QUIT']:
                 if self.require_authentication and not self.authenticated:
@@ -138,7 +153,7 @@ class SMTPChannel(smtpd.SMTPChannel):
             self.__rcpttos = []
             self.__mailfrom = None
             self.__state = self.COMMAND
-            self.set_terminator('\r\n')
+            self.set_terminator(b'\r\n')
             if not status:
                 self.push('250 Ok')
             else:
