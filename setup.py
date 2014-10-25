@@ -27,7 +27,10 @@ setup(
     classifiers=[ # See: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 4 - Beta',
         'Topic :: Communications :: Email :: Mail Transport Agents',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
         'License :: OSI Approved :: ISC License (ISCL)',
     ],
 )
