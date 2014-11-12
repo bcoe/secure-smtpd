@@ -124,6 +124,7 @@ class SMTPChannel(smtpd.SMTPChannel):
             if not command in ['AUTH', 'EHLO', 'HELO', 'NOOP', 'RSET', 'QUIT']:
                 if self.require_authentication and not self.authenticated:
                     self.push('530 Authentication required')
+                    return
                     
             method = getattr(self, 'smtp_' + command, None)
             if not method:
