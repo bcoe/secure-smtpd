@@ -17,7 +17,6 @@ SMTPServer(
     certfile='examples/server.crt',
     keyfile='examples/server.key',
     credential_validator=FakeCredentialValidator(),
-    debug=True
 )
 asyncore.loop()
 ```
