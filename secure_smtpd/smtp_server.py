@@ -1,9 +1,9 @@
 import secure_smtpd
 import ssl, smtpd, asyncore, socket, logging, signal, time, sys
 
-from smtp_channel import SMTPChannel
+from .smtp_channel import SMTPChannel
 from asyncore import ExitNow
-from process_pool import ProcessPool
+from .process_pool import ProcessPool
 from ssl import SSLError
 try:
     from Queue import Empty
