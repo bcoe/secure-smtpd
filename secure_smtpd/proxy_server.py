@@ -1,8 +1,8 @@
 import socket
 import smtplib
 import secure_smtpd
-from smtp_server import SMTPServer
-from store_credentials import StoreCredentials
+from .smtp_server import SMTPServer
+from .store_credentials import StoreCredentials
 
 class ProxyServer(SMTPServer):
     """Implements an open relay.  Inherits from secure_smtpd, so can handle
