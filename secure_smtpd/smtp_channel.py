@@ -48,17 +48,6 @@ class SMTPChannel(smtpd.SMTPChannel):
             data = data.decode('utf-8')
         self.__line.append(data)
 
-    def smtp_EHLO(self, arg):
-        if not arg:
-            self.push('501 Syntax: HELO hostname')
-            return
-        if self.__greeting:
-            self.push('503 Duplicate HELO/EHLO')
-        else:
-            self.push('250-%s Hello %s' % (self.__fqdn, arg))
-            self.push('250-AUTH LOGIN PLAIN')
-            self.push('250 EHLO')
-
     def smtp_AUTH(self, arg):
         if 'PLAIN' in arg:
             split_args = arg.split(' ')
