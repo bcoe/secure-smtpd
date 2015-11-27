@@ -24,7 +24,9 @@ class ProxyServer(SMTPServer):
         if 'debug' in kwargs:
             self.debug = kwargs.pop('debug')
 
-        kwargs['credential_validator'] = StoreCredentials()
+        if kwargs['credential_validator'] is None:
+            kwargs['credential_validator'] = StoreCredentials()
+
         SMTPServer.__init__(self, *args, **kwargs)
 
     def process_message(self, peer, mailfrom, rcpttos, data):
