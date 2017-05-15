@@ -6,7 +6,8 @@ import asynchat
 import logging
 
 from asyncore import ExitNow
-from smtpd import NEWLINE, EMPTYSTRING
+NEWLINE = '\n'
+EMPTYSTRING = ''
 
 
 def decode_b64(data):
@@ -47,6 +48,18 @@ class SMTPChannel(smtpd.SMTPChannel):
             # We're on python3, so we have to decode the bytestring
             data = data.decode('utf-8')
         self.__line.append(data)
+
+    def smtp_EHLO(self, arg):
+        if not arg:
+            self.push('501 Syntax: HELO hostname')
+            return
+        if self.__greeting:
+            self.push('503 Duplicate HELO/EHLO')
+        else:
+            self.__greeting = arg
+            self.push('250-%s Hello %s' % (self.__fqdn, arg))
+            self.push('250-AUTH LOGIN PLAIN')
+            self.push('250 EHLO')
 
     def smtp_AUTH(self, arg):
         if 'PLAIN' in arg:
