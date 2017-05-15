@@ -34,6 +34,7 @@ class SMTPServer(smtpd.SMTPServer):
     def _accept_subprocess(self, queue):
         while True:
             try:
+                newsocket = None
                 self.socket.setblocking(1)
                 pair = self.accept()
                 map = {}
@@ -71,7 +72,8 @@ class SMTPServer(smtpd.SMTPServer):
                 self._shutdown_socket(newsocket)
                 self.logger.info('_accept_subprocess(): smtp channel terminated asyncore.')
             except Exception as e:
-                self._shutdown_socket(newsocket)
+                if newsocket is not None:
+                    self._shutdown_socket(newsocket)
                 self.logger.error('_accept_subprocess(): uncaught exception: %s' % str(e))
 
     def _shutdown_socket(self, s):
